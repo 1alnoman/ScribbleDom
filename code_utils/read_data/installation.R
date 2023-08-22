@@ -1,0 +1,31 @@
+
+install_libraries <- function() {
+  if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+  
+  if (!require("SingleCellExperiment", quietly = TRUE))
+    BiocManager::install("SingleCellExperiment")
+  if (!require("scater", quietly = TRUE))
+    BiocManager::install("scater")
+  if (!require("scran", quietly = TRUE))
+    BiocManager::install("scran")
+  
+  if (!require("mclust", quietly = TRUE))
+    install.packages("mclust")
+  if (!require("Matrix", quietly = TRUE))
+    install.packages("Matrix")
+  if (!require("rhdf5", quietly = TRUE))
+    install.packages("rhdf5")
+  if (!require("scater", quietly = TRUE))
+    install.packages("scater")
+  if (!require("tidyverse", quietly = TRUE))
+    install.packages("tidyverse") 
+  if (!require("rjson", quietly = TRUE))
+    install.packages("rjson")
+  if (!require("RCurl", quietly = TRUE))
+    install.packages("RCurl")
+  if (!require("assertthat", quietly = TRUE))
+    install.packages("assertthat")
+  if (!require("BiocFileCache", quietly = TRUE))
+    BiocManager::install("BiocFileCache")
+}
