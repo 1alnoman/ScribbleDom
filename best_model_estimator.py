@@ -25,6 +25,7 @@ final_output_folder = params['final_output_folder']
 dataset = params['dataset']
 samples = params['samples']
 npcs = params['n_pcs']
+scheme = params['schema']
 
 def make_directory_if_not_exist(path):
     if not os.path.exists(path):
@@ -69,7 +70,7 @@ df_results = {}
 var_results = {}
 
 for sample in samples:
-    fname_out_root = f"./{model_outputs_folder}/{dataset}/{sample}/*/" 
+    fname_out_root = f"./{model_outputs_folder}/{dataset}/{sample}/{scheme}/*/" 
     fname = get_Human_DLPFC_filenames(dataset, sample, fname_out_root)
     
     df = pd.read_csv(fname["data"], index_col=0)
@@ -131,13 +132,13 @@ for sample in samples:
     idx2 = np.argmax(y2)
     idx3 = np.argmax(y3)
 
-    fname_out_root = f"./{model_outputs_folder}/{dataset}/{sample}/*/" 
+    fname_out_root = f"./{model_outputs_folder}/{dataset}/{sample}/{scheme}/*/" 
     fname = get_Human_DLPFC_filenames(dataset, sample, fname_out_root)
 
     src_final_meta = fname['meta'][idx3]
     src_final_label = fname['labels'][idx3]
 
-    final_output_dir = f"{final_output_folder}/{dataset}/{sample}"
+    final_output_dir = f"{final_output_folder}/{dataset}/{sample}/{scheme}"
     make_directory_if_not_exist(final_output_dir)
 
     dest_final_meta = f"{final_output_dir}/meta_data.csv"

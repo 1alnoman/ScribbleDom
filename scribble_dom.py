@@ -45,6 +45,7 @@ alpha_options = params['alpha_options']
 samples = params['samples']
 matrix_format_representation_of_data_path = params['matrix_represenation_of_ST_data_folder']
 output_data_path = params['model_output_folder']
+scheme = params['schema']
 
 use_cuda = torch.cuda.is_available()
 
