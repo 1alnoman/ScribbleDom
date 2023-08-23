@@ -25,8 +25,6 @@ def find_neighbouring_clusters(sample,barcode_grid,mclust_result,i_row,i_col):
 def make_backbone(preprocessed_data_folder, sample, dataset, threshold = 1):
     cnt_file_path = f'./{preprocessed_data_folder}/{dataset}/{sample}/reading_h5/'
     mclust_result_csv = f'./{preprocessed_data_folder}/{dataset}/{sample}/mclust_result.csv'
-    if sample == 'Melanoma':
-        mclust_result_csv = f'./{preprocessed_data_folder}/{dataset}/{sample}/mclust_scribble.csv'
 
     if dataset == 'Human_DLPFC':
         adata = sc.read_visium(cnt_file_path, count_file=f'{sample}_filtered_feature_bc_matrix.h5')
