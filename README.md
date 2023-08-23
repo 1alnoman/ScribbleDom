@@ -126,7 +126,7 @@ Rscript get_genex_data_from_rds_ST_data.R config.json
 ```
 
 ## step - 3:
-Create a manual scribble (manual_scribble.csv) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser). You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
+Create a manual scribble (manual_scribble.csv) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser) and a ```.cloupe``` file from [space ranger output](https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/output/aggr-overview) of your sample. You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
 ```
 .
 └── {preprocessed_data_folder}/
