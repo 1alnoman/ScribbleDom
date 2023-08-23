@@ -6,8 +6,8 @@
     "final_output_folder" : "final_outputs",
 
     "dataset": "cancers",
-    "samples": ["bcdc_ffpe"],
-    "technology": "visium",
+    "samples": ["Melanoma"],
+    "technology": "st",
     "n_pcs": 7,
     "n_cluster_for_auto_scribble": 4,
 

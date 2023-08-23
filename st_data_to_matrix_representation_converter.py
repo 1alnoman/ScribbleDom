@@ -25,14 +25,16 @@ samples = params['samples']
 scheme = params['schema']
 matrix_format_representation_of_data_path = params['matrix_represenation_of_ST_data_folder']
 preprocessed_dataset_folder = params['preprocessed_data_folder']
+technology = params['technology']
 
 for sample in samples:
     h5_path = f'./{preprocessed_dataset_folder}/{dataset}/{sample}/reading_h5/'
     h5_file = f'{sample}_filtered_feature_bc_matrix.h5'
-    if dataset != 'Human_DLPFC':
-        adata = scanpy.read(h5_path+h5_file)
-    else :
+    if technology == 'visium':
         adata = scanpy.read_visium(path=h5_path,count_file=h5_file)
+    else:
+        print("Only visium data works in this pipeline")
+        exit()
     adata.var_names_make_unique()
     
     # %%

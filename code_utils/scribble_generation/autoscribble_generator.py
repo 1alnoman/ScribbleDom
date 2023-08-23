@@ -22,17 +22,17 @@ def find_neighbouring_clusters(sample,barcode_grid,mclust_result,i_row,i_col):
         neighbours_clusters.append(mclust_result['cluster.init'].loc[barcode_grid[x,y]])
     return neighbours_clusters
 
-def make_backbone(preprocessed_data_folder, sample, dataset, threshold = 1):
+def make_backbone(preprocessed_data_folder, sample, dataset, threshold = 1, technology='visium'):
     cnt_file_path = f'./{preprocessed_data_folder}/{dataset}/{sample}/reading_h5/'
     mclust_result_csv = f'./{preprocessed_data_folder}/{dataset}/{sample}/mclust_result.csv'
 
-    if dataset == 'Human_DLPFC':
+    arr_row,arr_col = None,None
+    if technology == 'visium':
         adata = sc.read_visium(cnt_file_path, count_file=f'{sample}_filtered_feature_bc_matrix.h5')
+        arr_row,arr_col = adata.obs['array_row'],adata.obs['array_col']
     else:
-        adata = sc.read(cnt_file_path+f'{sample}_filtered_feature_bc_matrix.h5')
-
-
-    arr_row,arr_col = adata.obs['array_row'],adata.obs['array_col']
+        df_coord = pd.read_csv(f"./{preprocessed_data_folder}/{dataset}/{sample}/Coordinates/coordinates.csv",index_col=0)
+        arr_row,arr_col = df_coord.iloc[:,-1],df_coord.iloc[:,-2]
 
     # define 2d grid of string as barcode
     barcode_grid = np.empty((arr_row.max()+1,arr_col.max()+1),dtype=object)

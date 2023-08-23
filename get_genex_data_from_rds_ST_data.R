@@ -24,13 +24,15 @@ n_PCs <- params$n_pcs
 n_cluster <- params$n_cluster_for_auto_scribble
 tech <- params$technology
 
-if (tech != "ST") {
+if (tech != "st") {
   print("Invalid data, give a ST data")
   return(-1)
 }
 
 for (sample in samples) {
-  sce <- getRDS(dataset="2018_thrane_melanoma", sample="ST_mel1_rep2")
+  rds_name <- sprintf("%s/%s/%s/%s.rds",space_ranger_out,dataset,sample,sample)
+
+  sce <- readRDS(rds_name)
   sce <- scater::logNormCounts(sce)
   
   set.seed(101)
@@ -65,6 +67,8 @@ for (sample in samples) {
   write.csv(pcs,pcs_csv_path)
   write.csv(coordinates,coord_csv_path)
   write.csv(mclust_result,mclust_csv_path)
+  
+  print("DONE!!!!")
 }
 
 

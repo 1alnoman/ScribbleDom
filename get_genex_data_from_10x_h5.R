@@ -24,14 +24,14 @@ n_PCs <- params$n_pcs
 n_cluster <- params$n_cluster_for_auto_scribble
 tech <- params$technology
 
-if (tech != "visium") {
-  print("Invalid data, give a visium data")
+if (tech == "st") {
+  print("Invalid data, give an ST data")
   return(-1)
 }
 
 for (sample in samples) {
-  dir_name = sprintf("%s/%s/%s",space_ranger_out,dataset,sample)
-  h5_name = sprintf("%s_filtered_feature_bc_matrix.h5",sample)
+  dir_name <- sprintf("%s/%s/%s",space_ranger_out,dataset,sample)
+  h5_name <- sprintf("%s_filtered_feature_bc_matrix.h5",sample)
   
   sce <- read10Xh5(dir_name,h5_name)
   sce <- scater::logNormCounts(sce)
@@ -71,6 +71,8 @@ for (sample in samples) {
   write.csv(coordinates,coord_csv_path)
   write.csv(mclust_result,mclust_csv_path)
   file.copy(list.files(dir_name, full.names = TRUE), reading_h5_folder, recursive = TRUE)
+  
+  print("DONE!!!!")
 }
 
 

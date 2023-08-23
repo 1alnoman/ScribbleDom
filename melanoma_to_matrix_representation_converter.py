@@ -41,6 +41,7 @@ samples = params['samples']
 scheme = params['schema']
 matrix_format_representation_of_data_path = params['matrix_represenation_of_ST_data_folder']
 preprocessed_dataset_folder = params['preprocessed_data_folder']
+technology = params['technology']
 
 
 # # File Paths
@@ -74,7 +75,7 @@ for sample in samples:
     make_directory_if_not_exist(f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys')
     make_directory_if_not_exist(f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble')
 
-    make_backbone(preprocessed_dataset_folder,sample,dataset)
+    make_backbone(preprocessed_dataset_folder,sample,dataset,threshold=1,technology=technology)
 
     # In[5]:
 
