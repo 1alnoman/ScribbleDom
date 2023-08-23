@@ -10,9 +10,8 @@
     "technology": "visium",
     "n_pcs": 15,
     "n_cluster_for_auto_scribble": 2,
-
-
     "schema": "expert",
+
     "max_iter": 300,
     "nConv": 1,
     "seed_options": [4],

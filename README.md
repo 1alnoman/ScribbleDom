@@ -3,14 +3,16 @@ A method to find spatial domain from Spatial Transcriptomics data using scribble
 output of other possibly non-spatial spatial domain detection method (e.g. mclust).
 
 # Prerequisites
-Results are generated using Google Colab Standard GPU. To ensure reproducibility, the following is done:
+Recommended Python version: 3.10.6</br>
+Recommended R version: 4.3.1</br>
+Recommended conda version: 4.12.0
+
+To ensure reproducibility, the following is done:
 ```
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 ```
 Note that, you do not need to set these if you run the program in cpu instead of gpu.
-
-Recommended Python version: 3.10.6
 
 # Installation
 First set and activate your environment by using the following command:
@@ -19,67 +21,160 @@ conda env create -f environment.yml
 conda activate scribble_dom
 ```
 
-# Input
-To run ScribbleDom, you need 3 input files for a sample:
- - The .h5 file containing the Anndata object
-    - It must contain the ```array_row```, and ```array_col``` representing the position of each spot in a grid
- - A CSV file containing the principal component values
- - A CSV file containing the scribble information for each spot
-
-## Location of the .h5 file:
-Place your .h5 file in ```./Data/[dataset name]/[sample name]/reading_h5/```. The current implementation reads the Anndata object
-by using ```scanpy.read_visium``` function. Hence, it expects a folder named ```spatial```, containing the scalefactors, tissue high 
-resolution image, low resolution image, tissue possitions list and so on, inside the ```reading_h5``` folder. Depending on the 
-structure of the .h5 file, you can use ```scanpy.read_h5ad``` fucntion to read the .h5 file, which doesn't require this ```spatial``` folder.
-
-## Location of the CSV containing principal components:
-Place the csv containing the principal compoents in ```./Data/[dataset_name]/[sample_name]/Principal_Components/CSV/```.
-Make sure to change the name of the ```pc_csv_path``` variable according to the name of your CSV file in ```preprocessor.py```.
-
-## Location of the CSV containing scribbles:
-Place the csv containing the principal compoents in ```./Data/[dataset_name]/[sample_name]/```.
-Make sure to change the name of the ```scr_csv_path``` variable according to the name of your CSV file in ```preprocessor.py```.
-
-## Other input parameters
-Set the input parameters (e.g. hyperparameters, output directory name, and so on...) in ```./Inputs/[expert/mclust]/[file_name].json``` by following the example json files shown inside ```./Inputs```.
-
-# How to generate scribbles?
-Scribbles can be generated using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser)
-
-# How to run?
-After setting up the input parameters on ```./Inputs/[expert/mclust]/[file_name].json```, the following steps are required to run ScribbleDom:
-
-1. preprocessing step:
-### If you run visium data. Here, breast cancer/ Human DLPFC data for preprocessing data,  
-At first you have to run preprocessor.py. For expert scribble scheme, run the following:
+# Run experiments with availabe data.
+To run human breast cancer data :
 ```
-python preprocessor.py --scheme expert --params "Preprocessor_input/[sample]_preprocessor_scheme.json"
+chmod +x run_bcdc_ffpe.sh
+./run_bcdc_ffpe.sh
 ```
-Or, for mclust scribble scheme, run the following:
+To run melanoma cancer data :
 ```
-python preprocessor.py --scheme mclust_backbone --params Preprocessor_input/[sample]_preprocessor_scheme.json
-```  
-Here, sample = bcdc or DLPFC  
-### Otherwise, If you run ST data. Here, melanoma data for preprocessing data,  
-Run the notebook: ```Utils/melanoma_data_generation.ipynb```
-
-2. Then, to generate the spatial domain for expert scribble scheme, run:
+chmod +x run_melanoma.sh
+./run_melanoma.sh
 ```
-python expert_scribble_pipeline.py --params ./Inputs/expert/[sample]_expert_scribble_scheme_input.json
+To run human dlpfc cancer data :
 ```
-Or, to generate the spatial domain for mclust scribble scheme, run:
+chmod +x run_human_dlpfc.sh
+./run_human_dlpfc.sh
 ```
-python mclust_scribble_pipeline.py --params ./Inputs/mclust/[sample]_mclust_backbone_scheme_input.json
+
+
+# To run other visium/st data
+
+## step - 1: 
+ Prepear a config.json file. You will get an example in ```configs/bcdc/bcdc_config_expert.json``` file and prepear raw count matrix data.
+
+```json
+{
+    "preprocessed_data_folder" : "preprocessed_data",
+    "matrix_represenation_of_ST_data_folder" : "matrix_representation_of_st_data",
+    "model_output_folder" : "model_outputs",
+    "final_output_folder" : "final_outputs",
+
+    "space_ranger_output_directory" : "raw_gene_x",
+    "dataset": "cancers",
+    "samples": ["bcdc_ffpe"],
+    "technology": "visium",
+    "n_pcs": 15,
+    "n_cluster_for_auto_scribble": 2,
+    "schema": "expert",
+
+    "max_iter": 300,
+    "nConv": 1,
+    "seed_options": [4],
+    "alpha_options": [0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95],
+    "beta_options": [0.25,0.3,0.35,0.4],
+    "lr_options": [0.1]
+}
 ```
-Here, sample = bcdc or DLPFC or melanoma.
+1. "dataset" : Yous should give a name of your dataset for example here the name is "cancers". This is for internal file structure in our system.
+2. "samples" : You should give a name of the sample in your dataset. Here the sample is bcdc_ffpe.
+3. "technology" : This can be visium/st for this pipeline.
+4. "pcs" : The number of principat components you want for your data.
+5. "n_cluster_for_auto_scribble" : This field is used for automatic scribble generation. Give number of cluster for mclust initialization of your data.
+6. "schema": This can be either expert/mclust to indicate use of expert generated scribble or automated scribble.
+7. "space_ranger_output_directory" : This field should contains the space ranger output for mat directory for count matrix data.
+This directory structure is (for visum data):
+```
+.
+└── {space_ranger_output_directory}/
+    └── {dataset}/
+        └── {samples[i]}/
+            ├── spatial/
+            │   ├── tissue_positions_list.csv
+            │   ├── scalefactors_json.json
+            │   ├── tissue_hires_image.png
+            │   └── tissue_lowres_image.png
+            └── {samples[i]}_filtered_feature_bc_matrix.h5
+```
+or (for st data):
+```
+.
+└── {space_ranger_output_directory}/
+    └── {dataset}/
+        └── {samples[i]}/
+            └── {samples[i]}.rds
+```
+For example, for the json file shown above, the structure of space_ranger_output_directory should be:
+```
+.
+└── raw_gene_x/
+    └── cancers/
+        └── bcdc_ffpe/
+            ├── spatial/
+            │   ├── tissue_positions_list.csv
+            │   ├── scalefactors_json.json
+            │   ├── tissue_hires_image.png
+            │   └── tissue_lowres_image.png
+            └── bcdc_ffpe_filtered_feature_bc_matrix.h5
+```
 
-3. Results will be put in Outputs directory.
+other fileds can be as it is, for your config file.
 
-4. To calculate adjusted rand index (ARI), you will need the ground truth labels. Put the ground truth labels at ```./Data/[dataset name]/[sample name]/manual_annotations.csv```.
 
-5. To find hyper parameter value (alpha, beta) that give optimal result by grid search: 
-Run, ```Likelihood/Likelihood.ipynb``` , with the inputs asked
+## step - 2:
 
-# Other Informations
-The [drive folder](https://drive.google.com/drive/folders/1yVen1YkzbS408AW2r29Kh6dKF_gtJQHu?usp=sharing) ```supplementary images``` has the high quality figures of the supplementary information of our research paper.
+Preprocess the data.
 
+For visium data:
+```
+Rscript get_genex_data_from_10x_h5.R config.json
+```
+For st data:
+```
+Rscript get_genex_data_from_rds_ST_data.R config.json
+```
+
+## step - 3:
+Create a manual scribble (manual_scribble.csv) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser). You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
+```
+.
+└── {preprocessed_data_folder}/
+    └── {dataset}/
+        └── {samples[i]}/
+            └── manual_scribble.csv
+
+```
+
+## step - 4:
+To run our pipeline run the commands below:-
+For visium data:
+```
+chmod +x run_other_visium.sh
+./run_other_visium.sh config_expert.json config_mclust.json
+```
+For st data:
+```
+chmod +x run_other_st.sh
+./run_other_st.sh config_expert.json config_mclust.json
+```
+
+here config_expert.json and config_mclust.json are same as config.json file described above, with only difference of the scheme field, i.e.
+```json
+.
+.
+"schema": "expert",
+.
+.
+```
+in config_expert.json file. And
+
+
+```json
+.
+.
+"schema": "mclust",
+.
+.
+```
+in config_mclust.json file.
+
+
+## step - 5:
+Get the final output in final_outputs folder in
+```
+.
+└── final_outputs/
+    └── dataset/
+        └── samples[i]/
+```

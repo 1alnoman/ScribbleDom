@@ -1,3 +1,19 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import json
+import math
+import anndata
+import scipy
+import scanpy as sc
+import os
+
 # %%
 import sys
 import numpy as np
@@ -27,214 +43,227 @@ matrix_format_representation_of_data_path = params['matrix_represenation_of_ST_d
 preprocessed_dataset_folder = params['preprocessed_data_folder']
 technology = params['technology']
 
+
+# # File Paths
+
+# ### Input files path
+
+# In[3]:
+
+manual_scribble_filename = 'manual_scribble'
+
 for sample in samples:
-    h5_path = f'./{preprocessed_dataset_folder}/{dataset}/{sample}/reading_h5/'
-    h5_file = f'{sample}_filtered_feature_bc_matrix.h5'
-    if technology == 'visium':
-        adata = scanpy.read_visium(path=h5_path,count_file=h5_file)
-    else:
-        print("Only visium data works in this pipeline")
-        exit()
-    adata.var_names_make_unique()
-    
-    # %%
-    mapped_pc_file_path = f'./{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/mapped_{n_pcs}.npy'
-    backgrounds_file_path = f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/backgrounds.npy'
-    foregrounds_file_path = f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/foregrounds.npy'
-    pixel_barcode_file_path = f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/pixel_barcode.npy'
-
+    mclust_scribbles_file_csv = f"{preprocessed_dataset_folder}/{dataset}/{sample}/mclust_result.csv"
+    manual_scribble_file_csv = f"{preprocessed_dataset_folder}/{dataset}/{sample}/{manual_scribble_filename}.csv"
+    mclust_backbone_file_csv = f"{preprocessed_dataset_folder}/{dataset}/{sample}/mclust_backbone.csv"
     pc_csv_path = f'./{preprocessed_dataset_folder}/{dataset}/{sample}/Principal_Components/CSV/pcs_{n_pcs}_from_bayesSpace_top_2000_HVGs.csv'
-    scr_csv_path = f'./{preprocessed_dataset_folder}/{dataset}/{sample}/manual_scribble.csv'
-    scr_file_path = f'./{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble/manual_scribble.npy'
 
-    if scheme == 'mclust':
-        make_backbone(preprocessed_data_folder=preprocessed_dataset_folder,sample=sample,dataset=dataset)
-        scr_csv_path = f'./{preprocessed_dataset_folder}/{dataset}/{sample}/mclust_backbone.csv'
-        scr_file_path = f'./{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble/mclust_backbone_scribble.npy'
+    map_pixel_to_grid_spot_file_path = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Jsons/map_pixel_to_grid_spot.json"
+    background_path = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/backgrounds.npy"
+    foreground_path = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/foregrounds.npy"
+    pixel_barcode_file_path = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/pixel_barcode.npy"
+    pca_file_path = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/mapped_{n_pcs}.npy"
+    mclust_scribbles_file = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble/mclust_scribble.npy"
+    manual_scribbles_file = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble/manual_scribble.npy"
+    mclust_backbone_file = f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble/mclust_backbone_scribble.npy"
 
     def make_directory_if_not_exist(path):
         if not os.path.exists(path):
             os.makedirs(path)
 
+    make_directory_if_not_exist(f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Jsons')
     make_directory_if_not_exist(f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys')
     make_directory_if_not_exist(f'{matrix_format_representation_of_data_path}/{dataset}/{sample}/Scribble')
 
-    # %%
-    def make_grid_idx(adata):
-        n = adata.obs['array_row'].max() + 1
-        m = adata.obs['array_col'].max() + 1
-        grid_idx = np.zeros((n, m), dtype='int') - 1
-        spot_rows = adata.obs['array_row']
-        spot_cols = adata.obs['array_col']
-        grid_idx[spot_rows, spot_cols] = range(len(adata.obs.index))
+    make_backbone(preprocessed_dataset_folder,sample,dataset,threshold=1,technology=technology)
+
+    # In[5]:
+
+
+    os.makedirs(os.path.dirname(map_pixel_to_grid_spot_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(background_path), exist_ok=True)
+    os.makedirs(os.path.dirname(foreground_path), exist_ok=True)
+    os.makedirs(os.path.dirname(pixel_barcode_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(pca_file_path), exist_ok=True)
+    os.makedirs(os.path.dirname(mclust_scribbles_file_csv), exist_ok=True)
+    if scheme == 'expert':
+        os.makedirs(os.path.dirname(manual_scribble_file_csv), exist_ok=True)
+    os.makedirs(os.path.dirname(mclust_backbone_file_csv), exist_ok=True)
+
+
+    df_coord = pd.read_csv(f"./{preprocessed_dataset_folder}/{dataset}/{sample}/Coordinates/coordinates.csv",index_col=0)
+    x_pixels = []
+    y_pixels = []
+    labels = []
+    for i in range(df_coord.shape[0]):
+        spot = df_coord.index[i]
+        x_pixels.append(int(spot.split("x")[1])-1)
+        y_pixels.append(int(spot.split("x")[0])+1)
+
+
+    # In[13]:
+
+    pcs_from_BayesSpace = pd.read_csv(pc_csv_path, index_col=0)
+    pcs_7 = pcs_from_BayesSpace.values
+    pcs_7.shape
+
+
+    mapped_7 = np.zeros((max(y_pixels)+1, max(x_pixels)+1, 7))
+    for i in range(len(x_pixels)):
+        mapped_7[y_pixels[i], x_pixels[i]] = pcs_7[i]
+    np.save(f"{matrix_format_representation_of_data_path}/{dataset}/{sample}/Npys/mapped_{n_pcs}.npy", mapped_7)
+
+
+    # In[16]:
+
+
+    def make_grid_idx(x_pixels,y_pixels):
+        grid_idx = np.zeros((max(y_pixels)+1,max(x_pixels)+1)) - 1
+        for i in range(len(x_pixels)):
+            grid_idx[y_pixels[i],x_pixels[i]] = 1
         return grid_idx
 
-    def make_grid_barcode(adata):
-        n = adata.obs['array_row'].max() + 1
-        m = adata.obs['array_col'].max() + 1
-        grid_barcode = np.empty([n, m], dtype='<U100')
-        spot_rows = adata.obs['array_row']
-        spot_cols = adata.obs['array_col']
-        grid_barcode[spot_rows, spot_cols] = adata.obs.index
-        return grid_barcode
-
-    # %%
-    def check_grid_validity_return_starting_pos(grid):
-        '''
-        Check if the grid is valid or not, valid if (i + j) % 2 for all non -1s are equal where i and j can be row and col
-        Returns (i + j) % 2 of any 1 present in grid
-        '''
-        n = grid.shape[0]
-        m = grid.shape[1]
-        parity = -1
-        started = False
-        for i in range(n):
-            for j in range(m):
-                if grid[i, j] != -1 and not started:
-                    parity = (i + j) % 2
-                    started = True
-                if grid[i, j] != -1 and parity != (i + j) % 2:
-                    print("Invalid grid structure!")
-                    return -1
-        return parity
-
-    # %%
-    def refine(grid):pass
-
-    # %%
-    grid_idx = make_grid_idx(adata)
-    grid_barcode = make_grid_barcode(adata)
-    parity = check_grid_validity_return_starting_pos(grid_idx)
-
-    # %%
-    def make_grid_pixel_coor(grid_idx, parity):
-
-        n = grid_idx.shape[0]
-        m = grid_idx.shape[1]
-
-        grid_pixel_coor = np.zeros((n, m + 2, 2), dtype=int) - 1
-
+    def get_pixel_to_grid_spot_map(grid_pixel_coor, grid_idx):
         n = grid_pixel_coor.shape[0]
         m = grid_pixel_coor.shape[1]
-
+        map_pixel_to_grid_spot = {}
         for i in range(n):
             for j in range(m):
-                if (i + j) % 2 == parity:
-                    if i == 0 and j <= 1:
-                        grid_pixel_coor[0, j, :] = 0
-                    else:
-                        if j <= 1:
-                            grid_pixel_coor[i, j, :] = grid_pixel_coor[i - 1, j + 1, :] + [1, 0]
-                        else:
-                            grid_pixel_coor[i, j, :] = grid_pixel_coor[i, j - 2, :] + [0, 1]
-                    
-
-        return grid_pixel_coor[:,:-2]
-
-    # %%
-    grid_pixel_coor = make_grid_pixel_coor(grid_idx, parity)
-    # %%
-    pixel_coor = grid_pixel_coor.reshape((-1, 2))
-
-    # %%
-    mx = pixel_coor[:, 0].max()
-    color = grid_idx.flatten()
-
-    # %%
-    color[color != -1] = 1
-    if dataset == 'Custom': rad = 2000
-    else: rad = 10
+                if grid_idx[i, j] != -1:
+                    map_from = f'({i}, {j})'
+                    map_to = (i, j)
+                    map_pixel_to_grid_spot[map_from] = map_to
+        return map_pixel_to_grid_spot
 
 
-    # %%
-    def make_grid_pc(grid_pixel_coor, grid_barcode, map_barcode_pc):
-        mx_row = grid_pixel_coor[:, :, 0].max()
-        mx_col = grid_pixel_coor[:, :, 1].max()
-        grid_pc = np.zeros((mx_row + 1, mx_col + 1, n_pcs))
-        idx_rows_cols = np.argwhere(grid_barcode != '')
-        idx_rows = idx_rows_cols[:, 0]
-        idx_cols = idx_rows_cols[:, 1]
-        pixel_rows_cols = grid_pixel_coor[idx_rows, idx_cols]
-        barcode_sequence = grid_barcode[grid_barcode != '']
-        grid_pc[pixel_rows_cols[:, 0], pixel_rows_cols[:, 1], :] = [map_barcode_pc[barcode] for barcode in barcode_sequence]
-        return grid_pc
+    # In[17]:
 
-    # %%
-    def make_grid_scr(grid_pixel_coor, grid_barcode, df_barcode_scr):
-        mx_row = grid_pixel_coor[:, :, 0].max()
-        mx_col = grid_pixel_coor[:, :, 1].max()
-        grid_scr = np.zeros((mx_row + 1, mx_col + 1), dtype='int') + 255
-        idx_rows_cols = np.argwhere(grid_barcode != '')
-        idx_rows = idx_rows_cols[:, 0]
-        idx_cols = idx_rows_cols[:, 1]
-        pixel_rows_cols = grid_pixel_coor[idx_rows, idx_cols]
-        barcode_sequence = grid_barcode[grid_barcode != '']
-        grid_scr[pixel_rows_cols[:, 0], pixel_rows_cols[:, 1]] = [df_barcode_scr.iloc[:,-1][barcode] for barcode in barcode_sequence]
-        return grid_scr
 
-    # %%
-    def make_pixel_barcode(grid_pixel_coor, grid_barcode):
-        mx_row = grid_pixel_coor[:, :, 0].max()
-        mx_col = grid_pixel_coor[:, :, 1].max()
+    grid_idx = make_grid_idx(x_pixels,y_pixels)
+    map_pixel_to_grid_spot = get_pixel_to_grid_spot_map(grid_idx, grid_idx)
+
+
+
+    with open(map_pixel_to_grid_spot_file_path, "w") as outfile:
+        json.dump(map_pixel_to_grid_spot, outfile)
+
+
+    # In[19]:
+
+
+    backgrounds = np.argwhere(grid_idx == -1)
+    foregrounds = np.argwhere(grid_idx == 1)
+
+
+    # In[20]:
+
+
+    np.save(background_path, backgrounds)
+    np.save(foreground_path, foregrounds)
+
+
+    # In[21]:
+
+
+    def make_pixel_barcode(grid_idx,x_pixels,y_pixels):
+        mx_row,mx_col = grid_idx.shape
+
         pixel_barcode = np.empty([mx_row + 1, mx_col + 1], dtype='<U100')
-        idx_rows_cols = np.argwhere(grid_barcode != '')
-        idx_rows = idx_rows_cols[:, 0]
-        idx_cols = idx_rows_cols[:, 1]
-        pixel_rows_cols = grid_pixel_coor[idx_rows, idx_cols]
-        barcode_sequence = grid_barcode[grid_barcode != '']
-        pixel_barcode[pixel_rows_cols[:, 0], pixel_rows_cols[:, 1]] = barcode_sequence
+
+        for i in range(len(x_pixels)):
+            pixel_barcode[y_pixels[i], x_pixels[i]] = str(y_pixels[i]-1) + "x" + str(x_pixels[i]+1)
         return pixel_barcode
 
-    # %%
-    pixel_barcode = make_pixel_barcode(grid_pixel_coor, grid_barcode)
+
+    # In[22]:
+
+
+    pixel_barcode = make_pixel_barcode(grid_idx,x_pixels,y_pixels)
     np.save(pixel_barcode_file_path, pixel_barcode)
 
-    # %%
-    def make_map_barcode_pc(csv_path):
-        df_pc = pd.read_csv(csv_path, index_col=0)
-        map_barcode_pc = dict(zip(df_pc.index, df_pc.values))
-        return map_barcode_pc
 
-    # %%
-    map_barcode_pc = make_map_barcode_pc(pc_csv_path)
-
-    # %%
-    grid_idx = make_grid_idx(adata)
-    grid_barcode = make_grid_barcode(adata)
-    parity = check_grid_validity_return_starting_pos(grid_idx)
-    if parity == -1: refine(grid_idx)
-
-    # grid_01 = make_grid01(grid_idx)
-    grid_pixel_coor = make_grid_pixel_coor(grid_idx, parity)
-    grid_pc = make_grid_pc(grid_pixel_coor, grid_barcode, map_barcode_pc)
-
-    # %%
-    df_barcode_scr = pd.read_csv(scr_csv_path, index_col=0).fillna(255).astype('int')
-    grid_scr = make_grid_scr(grid_pixel_coor, grid_barcode, df_barcode_scr)
-
-    np.save(scr_file_path, grid_scr)
-    np.save(mapped_pc_file_path, grid_pc)
-
-    # %%
-    def find_backgrounds(grid_pixel_coor, grid_barcode):
-        pixel_coor = grid_pixel_coor.reshape((-1, 2))
-        n = pixel_coor[:, 0].max() + 1
-        m = pixel_coor[:, 1].max() + 1
-        grid_binary = np.zeros((n, m), dtype='int')
-        idx_rows_cols = np.argwhere(grid_barcode != '')
-        idx_rows = idx_rows_cols[:, 0]
-        idx_cols = idx_rows_cols[:, 1]
-        pixel_rows_cols = grid_pixel_coor[idx_rows, idx_cols]
-
-        grid_binary[pixel_rows_cols[:, 0], pixel_rows_cols[:, 1]] = 1
-        background = np.argwhere(grid_binary == 0)
-        foreground = np.argwhere(grid_binary == 1)
-        return background, foreground
-
-    # %%
-    background, foreground = find_backgrounds(grid_pixel_coor, grid_barcode)
+    # In[23]:
 
 
-    # %%
-    np.save(backgrounds_file_path, background)
-    np.save(foregrounds_file_path, foreground)
+    new_scribble_spot = np.full_like(grid_idx, 255)
+    new_backbone_spot = np.full_like(grid_idx, 255)
+
+    df_mclust_scribble = pd.read_csv(mclust_scribbles_file_csv,index_col=0)
+    df_mclust_scribble.head()
+
+
+    # In[24]:
+
+
+    x_pixels = []
+    y_pixels = []
+    labels = []
+    for i in range(df_mclust_scribble.shape[0]):
+        spot = df_mclust_scribble.index[i]
+        x_pixels.append(int(spot.split("x")[1])-1)
+        y_pixels.append(int(spot.split("x")[0])+1)
+        labels.append(df_mclust_scribble.iloc[i,0])
+
+
+
+    # In[25]:
+
+
+    new_scribble_spot[y_pixels,x_pixels] = labels
+    np.save(mclust_scribbles_file,new_scribble_spot)
+
+
+    new_scribble_spot = np.full_like(grid_idx, 255)
+
+    if scheme == 'expert':
+        df_manual_scribble = pd.read_csv(manual_scribble_file_csv,index_col=0)
+    df_mclust_backbone = pd.read_csv(mclust_backbone_file_csv,index_col=0)
+
+
+    if scheme == 'expert':
+        x_pixels = []
+        y_pixels = []
+        x_pixels_col = []
+        y_pixels_col = []
+        labels_scribble = []
+        labels_scribble_col = []
+        for i in range(df_manual_scribble.shape[0]):
+            spot = df_manual_scribble.index[i]
+            if not math.isnan(df_manual_scribble.iloc[i,0]):
+                x_pixels.append(int(spot.split("x")[1])-1)
+                y_pixels.append(int(spot.split("x")[0])+1)
+                x_pixels_col.append(int(spot.split("x")[1])-1)
+                y_pixels_col.append(int(spot.split("x")[0])+1)
+                labels_scribble.append(df_manual_scribble.iloc[i,0]+1)
+                labels_scribble_col.append(df_manual_scribble.iloc[i,0]+1)
+            else:
+                x_pixels_col.append(int(spot.split("x")[1])-1)
+                y_pixels_col.append(int(spot.split("x")[0])+1)
+                labels_scribble_col.append(-1)
+        new_scribble_spot[y_pixels,x_pixels] = labels_scribble
+        np.save(manual_scribbles_file,new_scribble_spot)
+
+
+    x_pixels = []
+    y_pixels = []
+    labels_backbone = []
+    for i in range(df_mclust_backbone.shape[0]):
+        spot = df_mclust_backbone.index[i]
+        if not math.isnan(df_mclust_backbone.iloc[i,0]):
+            x_pixels.append(int(spot.split("x")[1])-1)
+            y_pixels.append(int(spot.split("x")[0])+1)
+            labels_backbone.append(df_mclust_backbone.iloc[i,0]+1)
+
+
+    # In[33]:
+
+
+    new_backbone_spot[y_pixels,x_pixels] = labels_backbone
+    np.save(mclust_backbone_file,new_backbone_spot)
+
+
+    # In[ ]:
+
+
+
+

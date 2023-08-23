@@ -1,18 +1,17 @@
 {
-    "raw_gene_expression_directory" : "nil",
     "preprocessed_data_folder" : "preprocessed_data",
     "matrix_represenation_of_ST_data_folder" : "matrix_representation_of_st_data",
     "model_output_folder" : "model_outputs",
     "final_output_folder" : "final_outputs",
 
+    "raw_gene_expression_directory" : "nil",
     "dataset": "Human_DLPFC",
     "samples": ["151507","151508","151509","151510","151669","151670","151671","151672","151673","151674","151675","151676"],
     "technology": "visium",
     "n_pcs": 15,
     "n_cluster_for_auto_scribble": 7,
-
-
     "schema": "expert",
+    
     "max_iter": 300,
     "nConv": 1,
     "seed_options": [4],

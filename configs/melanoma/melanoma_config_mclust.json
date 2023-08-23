@@ -1,18 +1,17 @@
 {
-    "raw_gene_expression_directory" : "nil",
     "preprocessed_data_folder" : "preprocessed_data",
     "matrix_represenation_of_ST_data_folder" : "matrix_representation_of_st_data",
     "model_output_folder" : "model_outputs",
     "final_output_folder" : "final_outputs",
 
+    "raw_gene_expression_directory" : "nil",
     "dataset": "cancers",
     "samples": ["Melanoma"],
     "technology": "st",
     "n_pcs": 7,
     "n_cluster_for_auto_scribble": 4,
-
-
     "schema": "mclust",
+    
     "max_iter": 300,
     "nConv": 1,
     "seed_options": [4],

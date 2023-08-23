@@ -1,18 +1,17 @@
 {
-    "space_ranger_output_directory" : "nil",
     "preprocessed_data_folder" : "preprocessed_data",
     "matrix_represenation_of_ST_data_folder" : "matrix_representation_of_st_data",
     "model_output_folder" : "model_outputs",
     "final_output_folder" : "final_outputs",
 
+    "space_ranger_output_directory" : "nil",
     "dataset": "cancers",
     "samples": ["bcdc_ffpe"],
     "technology": "visium",
     "n_pcs": 15,
     "n_cluster_for_auto_scribble": 2,
-
-
     "schema": "mclust",
+
     "max_iter": 300,
     "nConv": 1,
     "seed_options": [4],
