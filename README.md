@@ -124,7 +124,7 @@ For st data:
 ```
 Rscript get_genex_data_from_rds_ST_data.R config_mclust.json
 ```
-This step will produce preprocessed data with principal components of spots, coordinates and mclust_backbone.csv as Automated Scribble in the folder: 
+This step will produce preprocessed data with principal components of spots, coordinates and mclust_backbone.csv as Automated Scribble in the folder below: 
 ```
 .
 └── {preprocessed_data_folder}/
