@@ -2,8 +2,6 @@
 config_file_expert="configs/melanoma/melanoma_config_expert.json"
 config_file_mclust="configs/melanoma/melanoma_config_mclust.json"
 
-# Rscript get_genex_data_from_rds_ST_data.R ${config_file_expert}
-
 python visium_data_to_matrix_representation_converter.py --params ${config_file_mclust}
 echo "========================================"
 echo "Data convertend in matrix representation"
