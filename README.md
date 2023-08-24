@@ -70,7 +70,7 @@ chmod +x run_human_dlpfc.sh
 1. "dataset" : Yous should give a name of your dataset for example here the name is "cancers". This is for internal file structure in our system.
 2. "samples" : You should give a name of the sample in your dataset. Here the sample is bcdc_ffpe. This is also for internal file structure in our system.
 3. "technology" : This can be visium/st for this pipeline.
-4. "pcs" : The number of principal components you want for your data.
+4. "n_pcs" : The number of principal components you want for your data.
 5. "n_cluster_for_auto_scribble" : This field is used for automatic scribble generation. Give number of cluster for mclust initialization of your data.
 6. "schema": This can be either expert/mclust to indicate use of expert generated scribble or automated scribble.
 7. "space_ranger_output_directory" : This field should contains the space ranger output for mat directory for count matrix data.
@@ -124,6 +124,13 @@ For st data:
 ```
 Rscript get_genex_data_from_rds_ST_data.R config_mclust.json
 ```
+This step will produce preprocessed data with principal components of spots, coordinates and mclust_backbone.csv as Automated Scribble in the folder: 
+```
+.
+└── {preprocessed_data_folder}/
+    └── {dataset}/
+        └── {samples[i]}/
+```
 
 ## step - 3:
 Create a manual scribble (``manual_scribble.csv``) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser) and a ```.cloupe``` file from [space ranger output](https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/output/aggr-overview) of your sample. You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
@@ -135,6 +142,7 @@ Create a manual scribble (``manual_scribble.csv``) using [Loupe browser](https:/
             └── manual_scribble.csv
 
 ```
+If you don't generate ```manual_scribble.csv``` in this step, you will get the result from AutoScribbleDom only.
 
 ## step - 4:
 To run our pipeline run the commands below:-
