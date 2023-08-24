@@ -42,7 +42,7 @@ chmod +x run_human_dlpfc.sh
 # To run other visium/st data
 
 ## step - 1: 
- Prepear a config.json file. You will get an example in ```configs/bcdc/bcdc_config_expert.json``` file and prepear raw count matrix data.
+ Prepear a ```config_mclust.json``` and a ```config_expert.json``` file. You will get an example in ```configs/bcdc/bcdc_config_expert.json``` file and prepear raw count matrix data.
 
 ```json
 {
@@ -57,7 +57,7 @@ chmod +x run_human_dlpfc.sh
     "technology": "visium",
     "n_pcs": 15,
     "n_cluster_for_auto_scribble": 2,
-    "schema": "expert",
+    "schema": "mclust",
 
     "max_iter": 300,
     "nConv": 1,
@@ -68,9 +68,9 @@ chmod +x run_human_dlpfc.sh
 }
 ```
 1. "dataset" : Yous should give a name of your dataset for example here the name is "cancers". This is for internal file structure in our system.
-2. "samples" : You should give a name of the sample in your dataset. Here the sample is bcdc_ffpe.
+2. "samples" : You should give a name of the sample in your dataset. Here the sample is bcdc_ffpe. This is also for internal file structure in our system.
 3. "technology" : This can be visium/st for this pipeline.
-4. "pcs" : The number of principat components you want for your data.
+4. "pcs" : The number of principal components you want for your data.
 5. "n_cluster_for_auto_scribble" : This field is used for automatic scribble generation. Give number of cluster for mclust initialization of your data.
 6. "schema": This can be either expert/mclust to indicate use of expert generated scribble or automated scribble.
 7. "space_ranger_output_directory" : This field should contains the space ranger output for mat directory for count matrix data.
@@ -114,19 +114,19 @@ other fileds can be as it is, for your config file.
 
 ## step - 2:
 
-Preprocess the data.
+Preprocess the data. Finds the top 2000 highly variable genes and calculates principal components from raw Gene expression data. Also runs ```Mclust``` algorithm to create a automated scribble.
 
 For visium data:
 ```
-Rscript get_genex_data_from_10x_h5.R config.json
+Rscript get_genex_data_from_10x_h5.R config_mclust.json
 ```
 For st data:
 ```
-Rscript get_genex_data_from_rds_ST_data.R config.json
+Rscript get_genex_data_from_rds_ST_data.R config_mclust.json
 ```
 
 ## step - 3:
-Create a manual scribble (manual_scribble.csv) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser) and a ```.cloupe``` file from [space ranger output](https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/output/aggr-overview) of your sample. You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
+Create a manual scribble (``manual_scribble.csv``) using [Loupe browser](https://support.10xgenomics.com/single-cell-gene-expression/software/visualization/latest/what-is-loupe-cell-browser) and a ```.cloupe``` file from [space ranger output](https://support.10xgenomics.com/spatial-gene-expression/software/pipelines/latest/output/aggr-overview) of your sample. You will get a video [tutorial](https://youtu.be/nRy9TszaduQ) here. Place the manual scribble (manual_scribble.csv) in the folder location: 
 ```
 .
 └── {preprocessed_data_folder}/
