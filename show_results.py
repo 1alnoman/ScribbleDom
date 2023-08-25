@@ -27,12 +27,9 @@ for sample in samples:
     final_output_img = f"{final_output_folder}/{dataset}/{sample}/{scheme}/final_out.png"
     final_output_ari = f"{final_output_folder}/{dataset}/{sample}/{scheme}/ari.csv"
 
-
-    if not os.path.isfile(manual_annotation_file):
-        print("Manual annnotaion doesn't exist!!!!")
-        exit()
     if not os.path.isfile(final_output_file):
         print("Final output doesn't exist. Run the model to get final output!!!")
+        exit()
 
     df_final = pd.read_csv(final_output_file,index_col=0)
     df_coord = pd.read_csv(coordinate_file,index_col=0)
@@ -51,6 +48,10 @@ for sample in samples:
     plt.axis('off')
     plt.scatter(df_merged.iloc[:,-1],10000-df_merged.iloc[:,-2],c=colors_to_plt,s=10)
     plt.savefig(final_output_img,dpi=1200,bbox_inches='tight',pad_inches=0)
+
+    if not os.path.isfile(manual_annotation_file):
+        print("Manual annnotaion doesn't exist, can't calculate ari.!!!!")
+        exit()
 
     df_man = pd.read_csv(manual_annotation_file,index_col=0)
     df_man.sort_index(inplace=True)
