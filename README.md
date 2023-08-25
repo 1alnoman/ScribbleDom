@@ -186,3 +186,25 @@ Get the final output in final_outputs folder in
     └── dataset/
         └── samples[i]/
 ```
+
+# Miscellaneous
+We have generated a manual annotation for melanoma cancer dataset by Thrane et al. We used [ST Spot Detector](https://github.com/SpatialTranscriptomicsResearch/st_spot_detector) to map the spots to high resulation image's pixels. You will get the the csv file mapping the spot to the type of spot [here](preprocessed_data/cancers/Melanoma/manual_annotations.csv). In this ```.csv``` file the mapping corresponds to :</br></br>
+'0' : 'Stroma'</br>
+'1' : 'Lymphoid tissue'</br>
+'2' : 'Melanoma'</br>
+'3' : 'Unannotated by publisher'</br>
+None : 'Unannotated for being in borders of 2 type'</br>
+
+![A mushroom-head robot](preprocessed_data/cancers/Melanoma/melanoma_manual_annotation.png 'Melanoma Manual Annotation')
+
+## Scribbles for other samples
+Get the scribbles for other sample in the directory structure mentioned below:
+```
+.
+└── {preprocessed_data_folder}/
+    └── {dataset}/
+        └── {samples[i]}/
+            └── manual_scribble.csv
+            └── manual_annotation.csv
+
+```

@@ -34,13 +34,26 @@ for sample in samples:
     if not os.path.isfile(final_output_file):
         print("Final output doesn't exist. Run the model to get final output!!!")
 
-    df_man = pd.read_csv(manual_annotation_file,index_col=0)
     df_final = pd.read_csv(final_output_file,index_col=0)
     df_coord = pd.read_csv(coordinate_file,index_col=0)
-
-    df_man.sort_index(inplace=True)
     df_final.sort_index(inplace=True)
     df_coord.sort_index(inplace=True)
+
+    df_merged = pd.merge(df_final, df_coord, left_index=True, right_index=True)
+    cols = df_merged.columns
+    for col in cols:
+        df_merged[col] = df_merged[col].values.astype('int')
+
+    plot_color=["#F56867","#FEB915","#C798EE","#59BE86","#7495D3","#D1D1D1","#6D1A9C","#15821E","#3A84E6","#997273","#787878","#DB4C6C","#9E7A7A","#554236","#AF5F3C","#93796C","#F9BD3F","#DAB370","#877F6C","#268785"]
+    colors_to_plt = [plot_color[i%len(plot_color)] for i in df_merged.iloc[:,-3].values]
+
+    plt.figure(figsize=(5,5))
+    plt.axis('off')
+    plt.scatter(df_merged.iloc[:,-1],10000-df_merged.iloc[:,-2],c=colors_to_plt,s=10)
+    plt.savefig(final_output_img,dpi=1200,bbox_inches='tight',pad_inches=0)
+
+    df_man = pd.read_csv(manual_annotation_file,index_col=0)
+    df_man.sort_index(inplace=True)
 
     def calc_ari(df_1, df_2):
         df_merged = pd.merge(df_1, df_2, left_index=True, right_index=True).dropna()
@@ -56,18 +69,5 @@ for sample in samples:
 
     print(f"Ari for dataset:{dataset} sample:{sample} scheme:{scheme} is: ",ari)
     pd.DataFrame([{"ARI":ari}]).to_csv(final_output_ari)
-
-    df_merged = pd.merge(df_final, df_coord, left_index=True, right_index=True)
-    cols = df_merged.columns
-    for col in cols:
-        df_merged[col] = df_merged[col].values.astype('int')
-
-    plot_color=["#F56867","#FEB915","#C798EE","#59BE86","#7495D3","#D1D1D1","#6D1A9C","#15821E","#3A84E6","#997273","#787878","#DB4C6C","#9E7A7A","#554236","#AF5F3C","#93796C","#F9BD3F","#DAB370","#877F6C","#268785"]
-    colors_to_plt = [plot_color[i%len(plot_color)] for i in df_merged.iloc[:,-3].values]
-
-    plt.figure(figsize=(5,5))
-    plt.axis('off')
-    plt.scatter(df_merged.iloc[:,-1],10000-df_merged.iloc[:,-2],c=colors_to_plt,s=10)
-    plt.savefig(final_output_img,dpi=1200,bbox_inches='tight',pad_inches=0)
 
     
