@@ -188,6 +188,7 @@ Get the final output in final_outputs folder in
 ```
 
 # Miscellaneous
+## Manual annotation for melanoma st sample
 We have generated a manual annotation for melanoma cancer dataset by Thrane et al. We used [ST Spot Detector](https://github.com/SpatialTranscriptomicsResearch/st_spot_detector) to map the spots to high resulation image's pixels. You will get the the csv file mapping the spot to the type of spot [here](preprocessed_data/cancers/Melanoma/manual_annotations.csv). In this ```.csv``` file the mapping corresponds to :</br></br>
 '0' : 'Stroma'</br>
 '1' : 'Lymphoid tissue'</br>
