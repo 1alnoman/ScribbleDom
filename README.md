@@ -209,3 +209,7 @@ Get the scribbles for other sample in the directory structure mentioned below:
             └── manual_annotation.csv
 
 ```
+
+# Licenses and Cites
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
