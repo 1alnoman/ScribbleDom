@@ -212,4 +212,5 @@ Get the scribbles for other sample in the directory structure mentioned below:
 
 # Licenses and Cites
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+License: [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)</br>
+Cite the code: [![DOI](https://zenodo.org/badge/681572669.svg)](https://zenodo.org/badge/latestdoi/681572669)
