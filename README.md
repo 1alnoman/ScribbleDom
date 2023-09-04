@@ -213,7 +213,7 @@ Get the scribbles for other sample in the directory structure mentioned below:
 # Licenses and Cites
 
 License: [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)</br>
-Cite the code on Zenodo: [![DOI](https://zenodo.org/badge/681572669.svg)](https://zenodo.org/badge/latestdoi/681572669)
+Cite the code on Zenodo: [![DOI](https://zenodo.org/badge/681572669.svg)](https://zenodo.org/badge/latestdoi/681572669)</br>
 Cite as:
 ```
 ScribbleDom: Using Scribble-Annotated Histology Images to Identify Domains in Spatial Transcriptomics Data
