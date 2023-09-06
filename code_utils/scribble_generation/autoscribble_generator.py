@@ -41,7 +41,7 @@ def make_backbone(preprocessed_data_folder, sample, dataset, threshold = 1, tech
     mclust_result = pd.read_csv(mclust_result_csv,index_col=0)
 
     mclust_backbone = pd.DataFrame(index=mclust_result.index)
-    mclust_backbone.iloc[:,-1] = None
+    mclust_backbone["cluster.init"] = None
 
     for i in range(barcode_grid.shape[0]):
         for j in range(barcode_grid.shape[1]):
