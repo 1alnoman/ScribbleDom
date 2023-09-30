@@ -3,6 +3,7 @@ A method to find spatial domain from Spatial Transcriptomics data using scribble
 output of other possibly non-spatial spatial domain detection method (e.g. mclust).
 
 # Prerequisites
+Recommended OS: Linux or WSL or Google Colab</br>
 Recommended Python version: 3.10.6</br>
 Recommended R version: 4.3.1</br>
 Recommended conda version: 4.12.0
