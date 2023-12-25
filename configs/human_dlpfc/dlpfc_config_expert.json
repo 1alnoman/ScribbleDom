@@ -4,7 +4,7 @@
     "model_output_folder" : "model_outputs",
     "final_output_folder" : "final_outputs",
 
-    "raw_gene_expression_directory" : "nil",
+    "space_ranger_output_directory" : "raw_gene_x",
     "dataset": "Human_DLPFC",
     "samples": ["151507","151508","151509","151510","151669","151670","151671","151672","151673","151674","151675","151676"],
     "technology": "visium",
