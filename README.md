@@ -21,6 +21,11 @@ First set and activate your environment by using the following command:
 conda env create -f environment.yml
 conda activate scribble_dom
 ```
+# Install libcairo2 as prerequisite of R libraries
+```
+apt-get install libcairo2-dev
+apt-get install libxt-dev
+```
 
 # Run experiments with availabe data.
 To run human breast cancer data :
